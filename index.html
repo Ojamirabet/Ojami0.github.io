@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ojami0 — security researcher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --bg2: #eeede9;
+    --ink: #1a1917;
+    --ink2: #6b6860;
+    --ink3: #a09e98;
+    --accent: #c0392b;
+    --accent2: #e8e0d4;
+    --border: #dbd9d3;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── LAYOUT ── */
+  .site-wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(247,246,243,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+
+  nav .inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink2);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 96px 0 72px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 52px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero-bio {
+    max-width: 480px;
+    color: var(--ink2);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .hero-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.15s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .btn-primary:hover { background: #333; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { background: var(--bg2); }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 64px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+    letter-spacing: 0.08em;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+
+  .section-link {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+  .section-link:hover { color: var(--ink); }
+
+  /* ── WRITEUPS ── */
+  .writeup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .writeup-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.12s;
+  }
+
+  .writeup-item:hover { background: var(--bg2); }
+
+  .writeup-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2px;
+  }
+
+  .writeup-title {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .tag-web    { background: #dbeafe; color: #1d4ed8; }
+  .tag-pwn    { background: #fce7f3; color: #9d174d; }
+  .tag-rev    { background: #d1fae5; color: #065f46; }
+  .tag-crypto { background: #ede9fe; color: #5b21b6; }
+  .tag-misc   { background: var(--bg2); color: var(--ink2); }
+
+  .writeup-platform {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+  }
+
+  .writeup-date {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+    white-space: nowrap;
+  }
+
+  .writeup-diff {
+    display: flex;
+    gap: 3px;
+  }
+
+  .diff-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .diff-dot.filled { background: var(--accent); }
+
+  /* ── TOOLS ── */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .tool-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tool-card:hover {
+    border-color: var(--ink3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+
+  .tool-icon {
+    font-family: var(--mono);
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .tool-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .tool-desc {
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.5;
+  }
+
+  .tool-lang {
+    margin-top: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .lang-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ── BLOG ── */
+  .blog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .blog-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .blog-date-block {
+    padding-top: 3px;
+    text-align: right;
+  }
+
+  .blog-date-block .month {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .blog-date-block .day {
+    font-size: 28px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--ink2);
+    letter-spacing: -0.02em;
+  }
+
+  .blog-content {}
+
+  .blog-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    transition: color 0.15s;
+  }
+
+  .blog-item:hover .blog-title { color: var(--accent); }
+
+  .blog-excerpt {
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .blog-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* ── ABOUT ── */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+
+  @media (max-width: 560px) {
+    .about-grid { grid-template-columns: 1fr; }
+  }
+
+  .about-text p {
+    color: var(--ink2);
+    font-size: 14px;
+    line-height: 1.75;
+    margin-bottom: 16px;
+  }
+
+  .stat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .stat-item {}
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 2px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .cert-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .cert {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 40px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  footer p {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 20px;
+  }
+
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink3);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .footer-links a:hover { color: var(--ink); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero > * {
+    animation: fadeUp 0.5s ease both;
+  }
+  .hero-tag       { animation-delay: 0.05s; }
+  .hero h1        { animation-delay: 0.12s; }
+  .hero-bio       { animation-delay: 0.18s; }
+  .hero-links     { animation-delay: 0.24s; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 480px) {
+    .tools-grid { grid-template-columns: 1fr; }
+    .blog-item  { grid-template-columns: 60px 1fr; gap: 12px; }
+    nav .nav-links { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a class="nav-logo" href="#"><span>~/</span>Ojami0</a>
+    <ul class="nav-links">
+      <li><a href="#writeups">writeups</a></li>
+      <li><a href="#tools">tools</a></li>
+      <li><a href="#blog">blog</a></li>
+      <li><a href="#about">about</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="site-wrapper">
+
+  <!-- HERO -->
+  <div class="hero">
+    <p class="hero-tag">security researcher · ctf player</p>
+    <h1>Breaking things,<br><em>learning everything.</em></h1>
+    <p class="hero-bio">
+      Apasionado por la seguridad ofensiva, CTFs y el desarrollo de herramientas.
+      Aquí comparto writeups, proyectos y todo lo que aprendo por el camino.
+    </p>
+    <div class="hero-links">
+      <a class="btn btn-primary" href="#writeups">Ver writeups →</a>
+      <a class="btn btn-outline" href="https://github.com/Ojami0" target="_blank">GitHub</a>
+      <a class="btn btn-outline" href="https://hackthebox.eu/profile/Ojami0" target="_blank">HTB</a>
+      <a class="btn btn-outline" href="https://tryhackme.com/p/Ojami0" target="_blank">THM</a>
+    </div>
+  </div>
+
+  <!-- WRITEUPS -->
+  <section id="writeups">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Writeups</h2>
+      <a class="section-link" href="#">ver todos →</a>
+    </div>
+
+    <div class="writeup-list">
+
+      <a class="writeup-item" href="#">
+        <div>
+          <div class="writeup-meta">
+            <span class="writeup-title">Blunder — HackTheBox</span>
+            <span class="tag tag-web">web</span>
+          </div>
+          <span class="writeup-platform">HackTheBox · Linux</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="writeup-date">Feb 2025</span>
+          <div class="writeup-diff">
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot"></div>
+            <div class="diff-dot"></div>
+            <div class="diff-dot"></div>
+          </div>
+        </div>
+      </a>
+
+      <a class="writeup-item" href="#">
+        <div>
+          <div class="writeup-meta">
+            <span class="writeup-title">Pwn101 — TryHackMe</span>
+            <span class="tag tag-pwn">pwn</span>
+          </div>
+          <span class="writeup-platform">TryHackMe · Buffer Overflow</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="writeup-date">Ene 2025</span>
+          <div class="writeup-diff">
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot"></div>
+            <div class="diff-dot"></div>
+          </div>
+        </div>
+      </a>
+
+      <a class="writeup-item" href="#">
+        <div>
+          <div class="writeup-meta">
+            <span class="writeup-title">CryptoPals Set 1</span>
+            <span class="tag tag-crypto">crypto</span>
+          </div>
+          <span class="writeup-platform">CryptoPals · XOR · Base64</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="writeup-date">Dic 2024</span>
+          <div class="writeup-diff">
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot"></div>
+          </div>
+        </div>
+      </a>
+
+      <a class="writeup-item" href="#">
+        <div>
+          <div class="writeup-meta">
+            <span class="writeup-title">Baby Crackme — CTF Nacional</span>
+            <span class="tag tag-rev">rev</span>
+          </div>
+          <span class="writeup-platform">CTF Nacional 2024 · Reversing</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="writeup-date">Nov 2024</span>
+          <div class="writeup-diff">
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+            <div class="diff-dot filled"></div>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- TOOLS -->
+  <section id="tools">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Herramientas</h2>
+      <a class="section-link" href="https://github.com/0xuser" target="_blank">GitHub →</a>
+    </div>
+
+    <div class="tools-grid">
+
+      <a class="tool-card" href="#" target="_blank">
+        <div class="tool-icon">⚡</div>
+        <span class="tool-name">portscanner-fast</span>
+        <p class="tool-desc">Scanner de puertos asíncrono con detección de servicios y banner grabbing.</p>
+        <span class="tool-lang">
+          <span class="lang-dot" style="background:#3572A5"></span>Python
+        </span>
+      </a>
+
+      <a class="tool-card" href="#" target="_blank">
+        <div class="tool-icon">🔍</div>
+        <span class="tool-name">subdomain-enum</span>
+        <p class="tool-desc">Enumeración de subdominios con múltiples resolvers y detección de wildcards.</p>
+        <span class="tool-lang">
+          <span class="lang-dot" style="background:#00ADD8"></span>Go
+        </span>
+      </a>
+
+      <a class="tool-card" href="#" target="_blank">
+        <div class="tool-icon">🔐</div>
+        <span class="tool-name">jwt-toolkit</span>
+        <p class="tool-desc">Análisis, manipulación y fuzzing de tokens JWT para encontrar vulnerabilidades.</p>
+        <span class="tool-lang">
+          <span class="lang-dot" style="background:#3572A5"></span>Python
+        </span>
+      </a>
+
+      <a class="tool-card" href="#" target="_blank">
+        <div class="tool-icon">📦</div>
+        <span class="tool-name">ctf-template</span>
+        <p class="tool-desc">Template de entorno Docker para CTFs con todas las herramientas pre-configuradas.</p>
+        <span class="tool-lang">
+          <span class="lang-dot" style="background:#384d54"></span>Dockerfile
+        </span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- BLOG -->
+  <section id="blog">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Blog</h2>
+      <a class="section-link" href="#">ver todo →</a>
+    </div>
+
+    <div class="blog-list">
+
+      <a class="blog-item" href="#">
+        <div class="blog-date-block">
+          <div class="month">Feb</div>
+          <div class="day">14</div>
+        </div>
+        <div class="blog-content">
+          <h3 class="blog-title">Cómo automatizo mis recon workflows con Python</h3>
+          <p class="blog-excerpt">Una guía práctica de los scripts que uso en mis auditorías para automatizar la fase de reconocimiento y no perder tiempo en tareas repetitivas.</p>
+          <div class="blog-tags">
+            <span class="tag tag-web">recon</span>
+            <span class="tag tag-misc">python</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="blog-item" href="#">
+        <div class="blog-date-block">
+          <div class="month">Ene</div>
+          <div class="day">28</div>
+        </div>
+        <div class="blog-content">
+          <h3 class="blog-title">Introducción al análisis de binarios con Ghidra</h3>
+          <p class="blog-excerpt">Desde cero: setup, primeros pasos con el decompilador y cómo entender una función desconocida sin morir en el intento.</p>
+          <div class="blog-tags">
+            <span class="tag tag-rev">reversing</span>
+          </div>
+        </div>
+      </a>
+
+      <a class="blog-item" href="#">
+        <div class="blog-date-block">
+          <div class="month">Dic</div>
+          <div class="day">03</div>
+        </div>
+        <div class="blog-content">
+          <h3 class="blog-title">Mi setup para jugar CTFs en 2025</h3>
+          <p class="blog-excerpt">El entorno, las herramientas y los atajos que uso para ser más eficiente durante competiciones. Incluye mi dotfiles y configuración de tmux.</p>
+          <div class="blog-tags">
+            <span class="tag tag-misc">setup</span>
+            <span class="tag tag-misc">workflow</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">About</h2>
+      <a class="section-link" href="#">cv.pdf →</a>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          Soy un investigador de seguridad enfocado en seguridad ofensiva y red teaming.
+          Compito regularmente en CTFs y me interesa especialmente web, pwn y reversing.
+        </p>
+        <p>
+          Durante el día estudio, por las noches rompo máquinas.
+          Creo en compartir conocimiento y hacer la comunidad más accesible para todos.
+        </p>
+        <div class="hero-links" style="margin-top:8px">
+          <a class="btn btn-outline" href="mailto:ojami0@pm.me">✉ Contacto</a>
+          <a class="btn btn-outline" href="#">PGP Key</a>
+        </div>
+      </div>
+
+      <div class="stat-list">
+        <div class="stat-item">
+          <div class="stat-label">Plataformas</div>
+          <div class="stat-value">HackTheBox · TryHackMe · CTFtime</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Intereses</div>
+          <div class="stat-value">Web · Pwn · Reversing · OSINT</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Herramientas</div>
+          <div class="stat-value">Burp · GDB · IDA · Ghidra · Wireshark</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Formación</div>
+          <div class="cert-badges">
+            <span class="cert">Postgrado Ciberseguridad</span>
+            <span class="cert" style="background:transparent;color:var(--ink2);border:1px solid var(--border);">CPTS — en progreso</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Ojami0 — hecho con café y curiosidad</p>
+    <div class="footer-links">
+      <a href="https://github.com/Ojami0" target="_blank">GitHub</a>
+      <a href="https://twitter.com/Ojami0" target="_blank">Twitter</a>
+      <a href="/rss.xml">RSS</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
